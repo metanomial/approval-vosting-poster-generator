@@ -77,9 +77,7 @@
       <text font-size=".451" font-weight="700" font-family="Roboto Condensed">
         <tspan x=".506" y="2.684">APPROVAL VOTING</tspan>
       </text>
-      <text font-size=".322" font-weight="400" font-family="Roboto Condensed" fill="#fff">
-        <tspan x=".631" y="3.35">Current Ballot</tspan>
-      </text>
+      <text id="beforeBallotTitle" font-size=".322" x=".631" y="3.35" font-weight="400" font-family="Roboto" fill="#fff"></text>
       <text font-size=".322" font-family="Roboto">
         <tspan x=".631" y="3.83" font-weight="700">City of Seattle</tspan>
         <tspan x=".631" y="4.138" font-weight="700">Mayor</tspan>
@@ -94,9 +92,7 @@
         <tspan id="cl4" x="1.141" y="6.372"></tspan>
         <tspan id="cl5" x="1.151" y="6.753"></tspan>
       </text>
-      <text font-size=".417" font-weight="700" font-family="Roboto Condensed" fill="#fff">
-        <tspan x="5.797" y="2.333">Better Ballot</tspan>
-      </text>
+      <text id="afterBallotTitle" x="5.797" y="2.333" font-size=".417" font-weight="700" font-family="Roboto Condensed" fill="#fff"></text>
       <text font-size=".417" font-weight="400" font-family="Roboto">
         <tspan x="5.797" y="2.958" font-weight="700">City of Seattle</tspan>
         <tspan x="5.797" y="3.357" font-weight="700">Mayor</tspan>
@@ -134,6 +130,14 @@
         <textarea id="subtitleHTML" cols="60" rows="4">Not the lesser of two evils</textarea>
       </div>
       <div>
+        <label for="beforeBallotTitle">Before Ballot Title</label>
+        <input type="text" id="beforeBallotTitleText" value="Current Ballot">
+      </div>
+      <div>
+        <label for="afterBallotTitle">After Ballot Title</label>
+        <input type="text" id="afterBallotTitleText" value="Better Ballot">
+      </div>
+      <div>
         <label for="c1">Candidate 1</label>
         <input type="text" id="c1" value="Mediocrity">
         <input type="checkbox" id="tbl1" checked>
@@ -164,17 +168,32 @@
         <input type="checkbox" id="tbr5" checked>
       </div>
       <button type="button" onclick="print();">Print</button>
+      <button type="button" onclick="share();">Share</button>
     </form>
     <script>
-      document.getElementById("titleHTML").addEventListener("input", update);
-      document.getElementById("titleSize").addEventListener("change", update);
-      document.getElementById("subtitleHTML").addEventListener("input", update);
-      for (let i = 1; i <= 5; i++) {
-        document.getElementById("c" + i).addEventListener("input", update);
-        document.getElementById("tbl" + i).addEventListener("change", update);
-        document.getElementById("tbr" + i).addEventListener("change", update);
-      }
+      declareInputFieldNames();
+      instantiateInputFields();
       update();
+
+      function declareInputFieldNames() {
+        INPUT_FIELD_NAMES = ["titleHTML", "titleSize", "subtitleHTML", "beforeBallotTitleText", "afterBallotTitleText"]
+        for (let i = 1; i <= 5; i++) {
+          INPUT_FIELD_NAMES = INPUT_FIELD_NAMES.concat(["c" + i, "tbl" + i, "tbr" + i]);
+        }
+      }
+
+      function instantiateInputFields() {
+        const searchParams = new URLSearchParams(window.location.search)
+
+        INPUT_FIELD_NAMES.forEach(function(fieldName) {
+          if (searchParams.get(fieldName) != null) {
+            document.getElementById(fieldName).value = searchParams.get(fieldName);
+          }
+          document.getElementById(fieldName).addEventListener("input", update);
+          document.getElementById(fieldName).addEventListener("change", update);
+        });
+      }
+
       function update() {
         const titleHTML = document.getElementById("titleHTML").value;
         const titleSize = document.getElementById("titleSize").value;
@@ -186,6 +205,13 @@
         const subtitle = document.getElementById("subtitle")
         subtitle.innerHTML = subtitleHTML;
         subtitle.setAttribute("y", 0.2 + title.getBBox().y + title.getBBox().height);
+        beforeBallotTitleText = document.getElementById("beforeBallotTitleText").value;
+        beforeBallotTitle = document.getElementById("beforeBallotTitle");
+        beforeBallotTitle.textContent = beforeBallotTitleText;
+        subtitle.setAttribute("y", 0.2 + title.getBBox().y + title.getBBox().height);
+        afterBallotTitleText = document.getElementById("afterBallotTitleText").value;
+        afterBallotTitle = document.getElementById("afterBallotTitle");
+        afterBallotTitle.textContent = afterBallotTitleText;
         for (let i = 1; i <= 5; i++) {
           const candidate = document.getElementById("c" + i).value;
           document.getElementById("cr" + i).textContent = candidate;
@@ -194,6 +220,23 @@
           document.getElementById("bl" + i).setAttribute("visibility", voteLeft ? "visible" : "hidden");
           const voteRight = document.getElementById("tbr" + i).checked;
           document.getElementById("br" + i).setAttribute("visibility", voteRight ? "visible" : "hidden");
+        }
+      }
+
+      function share() {
+        if ('URLSearchParams' in window) {
+          var searchParams = new URLSearchParams(window.location.search);
+          INPUT_FIELD_NAMES.forEach(function(fieldName) {
+            searchParams.set(fieldName, document.getElementById(fieldName).value);
+          });
+          
+          navigator.clipboard.writeText(searchParams.toString()).then(function() {
+            console.log('Async: Copying to clipboard was successful!');
+          }, function(err) {
+            console.error('Async: Could not copy text: ', err);
+          });
+
+          window.location.search = searchParams.toString();
         }
       }
     </script>
