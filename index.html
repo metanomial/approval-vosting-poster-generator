@@ -189,7 +189,7 @@
           if (searchParams.get(fieldName) != null) {
             const element = document.getElementById(fieldName);
             const value = searchParams.get(fieldName);
-            if (element.type === 'checkbox') {
+            if (element.type === "checkbox") {
               element.checked = value === "true";
             } else {
               element.value = value;
@@ -238,15 +238,17 @@
             searchParams.set(fieldName, value);
           });
 
-          const shareUrl = window.location.href + searchParams.toString();
+          const shareUrl = window.location.href.split('?')[0] + '?' + searchParams.toString();
           
           navigator.clipboard.writeText(shareUrl).then(function() {
             console.log('Async: Copying to clipboard was successful!');
           }, function(err) {
             console.error('Async: Could not copy text: ', err);
           });
+          
 
           window.location.search = searchParams.toString();
+
         }
       }
     </script>
