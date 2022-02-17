@@ -229,8 +229,10 @@
           INPUT_FIELD_NAMES.forEach(function(fieldName) {
             searchParams.set(fieldName, document.getElementById(fieldName).value);
           });
+
+          const shareUrl = window.location.href + searchParams.toString();
           
-          navigator.clipboard.writeText(searchParams.toString()).then(function() {
+          navigator.clipboard.writeText(shareUrl).then(function() {
             console.log('Async: Copying to clipboard was successful!');
           }, function(err) {
             console.error('Async: Could not copy text: ', err);
