@@ -187,7 +187,13 @@
 
         INPUT_FIELD_NAMES.forEach(function(fieldName) {
           if (searchParams.get(fieldName) != null) {
-            document.getElementById(fieldName).value = searchParams.get(fieldName);
+            const element = document.getElementById(fieldName);
+            const value = searchParams.get(fieldName);
+            if (element.type === 'checkbox') {
+              element.checked = value === "true";
+            } else {
+              element.value = value;
+            }
           }
           document.getElementById(fieldName).addEventListener("input", update);
           document.getElementById(fieldName).addEventListener("change", update);
@@ -227,7 +233,9 @@
         if ('URLSearchParams' in window) {
           var searchParams = new URLSearchParams(window.location.search);
           INPUT_FIELD_NAMES.forEach(function(fieldName) {
-            searchParams.set(fieldName, document.getElementById(fieldName).value);
+            const element = document.getElementById(fieldName);
+            const value = (element.type === 'checkbox') ? element.checked : element.value
+            searchParams.set(fieldName, value);
           });
 
           const shareUrl = window.location.href + searchParams.toString();
